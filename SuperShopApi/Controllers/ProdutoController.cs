@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using SuperShopApi.Models;
+using SuperShopApi.Servicos;
 
 namespace SuperShopApi.Controllers
 {
@@ -8,59 +11,54 @@ namespace SuperShopApi.Controllers
     [Route("[controller]")]
     public class ProdutoController : ControllerBase
     {
-        private static List<Produto> produtos = new List<Produto>
+        private readonly IProdutoService _produtoService;
+
+        public ProdutoController(IProdutoService produtoService)
         {
-            new Produto { Id = 1, Nome = "Rato", Descricao = "Rato sem fio", Quantidade = 10, Preco = 25.99M },
-            new Produto { Id = 2, Nome = "Teclado", Descricao = "Teclado inteligente", Quantidade = 5, Preco = 99.90M }
-        };
+            _produtoService = produtoService;
+        }
 
         [HttpGet]
-        public IEnumerable<Produto> Get()
+        public IActionResult Get()
         {
-            return produtos;
+            var produtos = _produtoService.GetProdutos();
+            return Ok(produtos);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Produto> Get(int id)
+        public IActionResult GetById(int id)
         {
-            var produto = produtos.FirstOrDefault(p => p.Id == id);
+            var produto = _produtoService.GetProdutoById(id);
             if (produto == null)
                 return NotFound();
 
-            return produto;
+            return Ok(produto);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] Produto produto)
+        public IActionResult Post(Produto produto)
         {
-            produto.Id = produtos.Max(p => p.Id) + 1;
-            produtos.Add(produto);
-            return CreatedAtAction(nameof(Get), new { id = produto.Id }, produto);
+            var novoProduto = _produtoService.AddProduto(produto);
+            return CreatedAtAction(nameof(GetById), new { id = novoProduto.Id }, novoProduto);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Produto produtoAtualizado)
+        public IActionResult Put(int id, Produto produto)
         {
-            var produto = produtos.FirstOrDefault(p => p.Id == id);
-            if (produto == null)
+            if (id != produto.Id)
+                return BadRequest();
+
+            var atualizado = _produtoService.UpdateProduto(produto);
+            if (atualizado == null)
                 return NotFound();
 
-            produto.Nome = produtoAtualizado.Nome;
-            produto.Descricao = produtoAtualizado.Descricao;
-            produto.Quantidade = produtoAtualizado.Quantidade;
-            produto.Preco = produtoAtualizado.Preco;
-
-            return NoContent();
+            return Ok(atualizado);
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var produto = produtos.FirstOrDefault(p => p.Id == id);
-            if (produto == null)
-                return NotFound();
-
-            produtos.Remove(produto);
+            _produtoService.DeleteProduto(id);
             return NoContent();
         }
     }
