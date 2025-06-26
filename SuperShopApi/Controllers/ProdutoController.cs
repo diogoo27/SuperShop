@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
-using SuperShopApi.Models;
+using SuperShopApi.DTOs;
 using SuperShopApi.Servicos;
 
 namespace SuperShopApi.Controllers
@@ -36,19 +33,19 @@ namespace SuperShopApi.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post(Produto produto)
+        public IActionResult Post([FromBody] ProdutoDTO produtoDto)
         {
-            var novoProduto = _produtoService.AddProduto(produto);
+            var novoProduto = _produtoService.AddProduto(produtoDto);
             return CreatedAtAction(nameof(GetById), new { id = novoProduto.Id }, novoProduto);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, Produto produto)
+        public IActionResult Put(int id, [FromBody] ProdutoDTO produtoDto)
         {
-            if (id != produto.Id)
+            if (id != produtoDto.Id)
                 return BadRequest();
 
-            var atualizado = _produtoService.UpdateProduto(produto);
+            var atualizado = _produtoService.UpdateProduto(produtoDto);
             if (atualizado == null)
                 return NotFound();
 

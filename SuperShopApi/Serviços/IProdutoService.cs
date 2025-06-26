@@ -1,14 +1,14 @@
-﻿using SuperShopApi.Models;
+﻿using SuperShopApi.DTOs;
 using System.Collections.Generic;
 
 namespace SuperShopApi.Servicos
 {
     public interface IProdutoService
     {
-        IEnumerable<Produto> GetProdutos();
-        Produto GetProdutoById(int id);
-        Produto AddProduto(Produto produto);
+        IEnumerable<ProdutoDTO> GetProdutos();
+        ProdutoDTO GetProdutoById(int id);
+        ProdutoDTO AddProduto(ProdutoDTO produtoDto);
         void DeleteProduto(int id);
-        Produto UpdateProduto(Produto produto);
+        ProdutoDTO UpdateProduto(ProdutoDTO produtoDto);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using SuperShopApi.Data;
+using SuperShopApi.DTOs;
 using SuperShopApi.Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,21 +15,43 @@ namespace SuperShopApi.Servicos
             _context = context;
         }
 
-        public IEnumerable<Produto> GetProdutos()
+        public IEnumerable<ProdutoDTO> GetProdutos()
         {
-            return _context.Produtos.ToList();
+            return _context.Produtos.Select(p => new ProdutoDTO
+            {
+                Id = p.Id,
+                Nome = p.Nome,
+                Preco = p.Preco
+            }).ToList();
         }
 
-        public Produto GetProdutoById(int id)
+        public ProdutoDTO GetProdutoById(int id)
         {
-            return _context.Produtos.FirstOrDefault(p => p.Id == id);
+            var p = _context.Produtos.FirstOrDefault(p => p.Id == id);
+            if (p == null) return null;
+
+            return new ProdutoDTO
+            {
+                Id = p.Id,
+                Nome = p.Nome,
+                Preco = p.Preco
+            };
         }
 
-        public Produto AddProduto(Produto produto)
+        public ProdutoDTO AddProduto(ProdutoDTO produtoDto)
         {
+            var produto = new Produto
+            {
+                Nome = produtoDto.Nome,
+                Preco = produtoDto.Preco
+            };
+            
+
             _context.Produtos.Add(produto);
             _context.SaveChanges();
-            return produto;
+
+            produtoDto.Id = produto.Id;
+            return produtoDto;
         }
 
         public void DeleteProduto(int id)
@@ -41,16 +64,16 @@ namespace SuperShopApi.Servicos
             }
         }
 
-        public Produto UpdateProduto(Produto produto)
+        public ProdutoDTO UpdateProduto(ProdutoDTO produtoDto)
         {
-            var existente = _context.Produtos.FirstOrDefault(p => p.Id == produto.Id);
-            if (existente != null)
-            {
-                existente.Nome = produto.Nome;
-                existente.Preco = produto.Preco;
-                _context.SaveChanges();
-            }
-            return existente;
+            var existente = _context.Produtos.FirstOrDefault(p => p.Id == produtoDto.Id);
+            if (existente == null) return null;
+
+            existente.Nome = produtoDto.Nome;
+            existente.Preco = produtoDto.Preco;
+            _context.SaveChanges();
+
+            return produtoDto;
         }
     }
 }
